@@ -1,33 +1,4 @@
-use hypex_ui::{toasts, CommandPalette, UICommand, UICommandSender};
-
-/// Sender that queues up the execution of a command.
-pub struct CommandSender(std::sync::mpsc::Sender<UICommand>);
-
-impl UICommandSender for CommandSender {
-    /// Send a command to be executed.
-    fn send_ui(&self, command: UICommand) {
-        // The only way this can fail is if the receiver has been dropped.
-        self.0.send(command).ok();
-    }
-}
-
-/// Receiver for the [`CommandSender`]
-pub struct CommandReceiver(std::sync::mpsc::Receiver<UICommand>);
-
-impl CommandReceiver {
-    /// Receive a command to be executed if any is queued.
-    pub fn recv(&self) -> Option<UICommand> {
-        // The only way this can fail (other than being empty)
-        // is if the sender has been dropped.
-        self.0.try_recv().ok()
-    }
-}
-
-/// Creates a new command channel.
-fn command_channel() -> (CommandSender, CommandReceiver) {
-    let (sender, receiver) = std::sync::mpsc::channel();
-    (CommandSender(sender), CommandReceiver(receiver))
-}
+use hypex_ui::toasts;
 
 fn main() -> eframe::Result<()> {
     re_log::setup_native_logging();
@@ -74,13 +45,6 @@ pub struct ExampleApp {
     bottom_panel: bool,
 
     dummy_bool: bool,
-
-    cmd_palette: CommandPalette,
-
-    /// Commands to run at the end of the frame.
-    pub command_sender: CommandSender,
-    command_receiver: CommandReceiver,
-    latest_cmd: String,
 }
 
 impl ExampleApp {
@@ -89,8 +53,6 @@ impl ExampleApp {
         re_log::add_boxed_logger(Box::new(logger)).unwrap();
 
         let tree = egui_tiles::Tree::new_tabs(vec![1, 2, 3]);
-
-        let (command_sender, command_receiver) = command_channel();
 
         Self {
             hypex_ui,
@@ -104,11 +66,6 @@ impl ExampleApp {
             bottom_panel: true,
 
             dummy_bool: true,
-
-            cmd_palette: CommandPalette::default(),
-            command_sender,
-            command_receiver,
-            latest_cmd: Default::default(),
         }
     }
 
@@ -187,6 +144,9 @@ impl eframe::App for ExampleApp {
                         if ui.button("Log error").clicked() {
                             re_log::error!("A lot of text on error level.\nA lot of text in fact. So much that we should ideally be auto-wrapping it at some point, much earlier than this.");
                         }
+                        if ui.button("Log another error").clicked() {
+                            re_log::error!("Oops... Hypex UI crashed!")
+                        }
                     });
 
                 egui::ScrollArea::both()
@@ -201,7 +161,6 @@ impl eframe::App for ExampleApp {
                                 ui.label("Toggle switch:");
                                 ui.add(hypex_ui::toggle_switch(&mut self.dummy_bool));
                             });
-                            ui.label(format!("Latest command: {}", self.latest_cmd));
 
                             self.hypex_ui.large_collapsing_header(ui, "Data", true, |ui| {
                                 ui.label("Some data here");
@@ -237,23 +196,6 @@ impl eframe::App for ExampleApp {
             .show(egui_ctx, |ui| {
                 tabs_ui(ui, &mut self.tree);
             });
-
-        if let Some(cmd) = self.cmd_palette.show(egui_ctx) {
-            self.command_sender.send_ui(cmd);
-        }
-        if let Some(cmd) = hypex_ui::UICommand::listen_for_kb_shortcut(egui_ctx) {
-            self.command_sender.send_ui(cmd);
-        }
-
-        while let Some(cmd) = self.command_receiver.recv() {
-            self.latest_cmd = cmd.text().to_owned();
-
-            #[allow(clippy::single_match)]
-            match cmd {
-                UICommand::ToggleCommandPalette => self.cmd_palette.toggle(),
-                _ => {}
-            }
-        }
     }
 }
 
@@ -282,7 +224,7 @@ impl ExampleApp {
                     ui.set_height(top_bar_style.height);
                     ui.add_space(top_bar_style.indent);
 
-                    ui.menu_button("File", |ui| file_menu(ui, &self.command_sender));
+                    ui.menu_button("File", |ui| ui.label("Hey"));
 
                     self.top_bar_ui(ui, frame);
                 })
@@ -329,13 +271,6 @@ impl ExampleApp {
             );
         });
     }
-}
-
-fn file_menu(ui: &mut egui::Ui, command_sender: &CommandSender) {
-    UICommand::Save.menu_button_ui(ui, command_sender);
-    UICommand::SaveSelection.menu_button_ui(ui, command_sender);
-    UICommand::Open.menu_button_ui(ui, command_sender);
-    UICommand::Quit.menu_button_ui(ui, command_sender);
 }
 
 fn selection_buttons(ui: &mut egui::Ui) {
