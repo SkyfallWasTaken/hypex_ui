@@ -48,7 +48,7 @@ use parking_lot::Mutex;
 use egui::{pos2, Align2, Color32, Mesh, NumExt, Rect, Shape, Vec2};
 
 #[derive(Clone)]
-pub struct ReUi {
+pub struct HypexUi {
     pub egui_ctx: egui::Context,
 
     /// Colors, styles etc loaded from a design_tokens.json
@@ -57,8 +57,8 @@ pub struct ReUi {
     pub static_image_cache: Arc<Mutex<StaticImageCache>>,
 }
 
-impl ReUi {
-    /// Create [`ReUi`] and apply style to the given egui context.
+impl HypexUi {
+    /// Create [`HypexUi`] and apply style to the given egui context.
     pub fn load_and_apply(egui_ctx: &egui::Context) -> Self {
         Self {
             egui_ctx: egui_ctx.clone(),

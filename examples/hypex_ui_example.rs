@@ -25,14 +25,14 @@ fn main() -> eframe::Result<()> {
         "hypex_ui example app",
         native_options,
         Box::new(move |cc| {
-            let hypex_ui = hypex_ui::ReUi::load_and_apply(&cc.egui_ctx);
+            let hypex_ui = hypex_ui::HypexUi::load_and_apply(&cc.egui_ctx);
             Box::new(ExampleApp::new(hypex_ui))
         }),
     )
 }
 
 pub struct ExampleApp {
-    hypex_ui: hypex_ui::ReUi,
+    hypex_ui: hypex_ui::HypexUi,
     toasts: toasts::Toasts,
 
     /// Listens to the local text log stream
@@ -48,7 +48,7 @@ pub struct ExampleApp {
 }
 
 impl ExampleApp {
-    fn new(hypex_ui: hypex_ui::ReUi) -> Self {
+    fn new(hypex_ui: hypex_ui::HypexUi) -> Self {
         let (logger, text_log_rx) = re_log::ChannelLogger::new(re_log::LevelFilter::Info);
         re_log::add_boxed_logger(Box::new(logger)).unwrap();
 
@@ -125,9 +125,9 @@ impl eframe::App for ExampleApp {
             })
             .show_animated(egui_ctx, self.left_panel, |ui| {
                 egui::TopBottomPanel::top("left_panel_tio_bar")
-                    .exact_height(hypex_ui::ReUi::title_bar_height())
+                    .exact_height(hypex_ui::HypexUi::title_bar_height())
                     .frame(egui::Frame {
-                        inner_margin: egui::Margin::symmetric(hypex_ui::ReUi::view_padding(), 0.0),
+                        inner_margin: egui::Margin::symmetric(hypex_ui::HypexUi::view_padding(), 0.0),
                         ..Default::default()
                     })
                     .show_inside(ui, |ui| {
@@ -153,7 +153,7 @@ impl eframe::App for ExampleApp {
                     .auto_shrink([false; 2])
                     .show(ui, |ui| {
                         egui::Frame {
-                            inner_margin: egui::Margin::same(hypex_ui::ReUi::view_padding()),
+                            inner_margin: egui::Margin::same(hypex_ui::HypexUi::view_padding()),
                             ..Default::default()
                         }
                         .show(ui, |ui| {
@@ -177,7 +177,7 @@ impl eframe::App for ExampleApp {
 
         let panel_frame = egui::Frame {
             fill: egui_ctx.style().visuals.panel_fill,
-            inner_margin: hypex_ui::ReUi::view_padding().into(),
+            inner_margin: hypex_ui::HypexUi::view_padding().into(),
             ..Default::default()
         };
 
@@ -347,7 +347,7 @@ impl egui_tiles::Behavior<Tab> for MyTileTreeBehavior {
 
     /// The height of the bar holding tab titles.
     fn tab_bar_height(&self, _style: &egui::Style) -> f32 {
-        hypex_ui::ReUi::title_bar_height()
+        hypex_ui::HypexUi::title_bar_height()
     }
 
     /// What are the rules for simplifying the tree?

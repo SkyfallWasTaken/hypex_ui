@@ -1,11 +1,11 @@
 /// Utility for building layout jobs.
 pub struct LayoutJobBuilder<'a> {
     pub layout_job: egui::text::LayoutJob,
-    pub re_ui: &'a crate::ReUi,
+    pub re_ui: &'a crate::HypexUi,
 }
 
 impl<'a> LayoutJobBuilder<'a> {
-    pub fn new(re_ui: &'a crate::ReUi) -> Self {
+    pub fn new(re_ui: &'a crate::HypexUi) -> Self {
         Self {
             layout_job: egui::text::LayoutJob::default(),
             re_ui,
