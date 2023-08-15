@@ -1,4 +1,4 @@
-//! Rerun GUI theme and helpers, built around [`egui`](https://www.egui.rs/).
+//! Hypex's GUI theme and helpers, built around [`egui`](https://www.egui.rs/).
 mod design_tokens;
 pub mod egui_helpers;
 pub mod icons;
