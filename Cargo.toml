@@ -3,6 +3,7 @@ description = "Hypex's GUI theme and helpers, built around egui"
 license = "(MIT OR Apache-2.0) AND OFL-1.1"
 name = "hypex_ui"
 publish = true
+repository = "https://github.com/SkyfallWasTaken/hypex_ui"
 readme = "README.md"
 version = "0.22.0"
 edition = "2021"
